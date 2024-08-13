@@ -149,9 +149,10 @@ class ElementApi:
         while retrieve_after_id:
             if max_pages and i >= max_pages:
                 break
-            req = f'{self.api_location}/{route}?&auth={self.api_key}{
-                param_str
-            }&retrieve_after={retrieve_after_id}'
+            req = (
+                f'{self.api_location}/{route}?&auth={self.api_key}{param_str}&'
+                f'retrieve_after={retrieve_after_id}'
+            )
             ret = urllib.request.urlopen(req, timeout=5)
             data = json.load(ret)
             retrieve_after_id = data.get('retrieve_after_id')
