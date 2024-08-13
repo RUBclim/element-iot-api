@@ -1,0 +1,223 @@
+{
+  "body": [
+    {
+      "interfaces": [
+        {
+          "deleted_at": null,
+          "driver_instance_id": "e51754d9-6779-4cd0-a314-84b5d876f833",
+          "device_id": "0126d246-05e1-43c7-a0df-3765cf982022",
+          "enabled": true,
+          "meta": null,
+          "opts": {
+            "app_session_key": "EE16BE57786B091282797D7C389B8268",
+            "check_fcnt": true,
+            "check_join_eui": true,
+            "class_c": false,
+            "device_address": "01932AFF",
+            "device_eui": "70B3D57BA00054A6",
+            "device_key": "C0B6948575C15AE815FBD552E320A016",
+            "device_type": "otaa",
+            "gw_whitelist": null,
+            "join_eui": "70B3D57ED00006B2",
+            "lns_session_context": {
+              "a_fcnt_down": 50,
+              "app_s_key": "EE16BE57786B091282797D7C389B8268",
+              "dev_addr": "01932AFF",
+              "f_nwk_s_int_key": "03013FDBE38F233C0DCABF84ACED975E",
+              "fcnt_down": null,
+              "fcnt_up": 1482,
+              "n_fcnt_down": 0,
+              "nwk_s_enc_key": "03013FDBE38F233C0DCABF84ACED975E",
+              "nwk_s_key": null,
+              "s_nwk_s_int_key": "03013FDBE38F233C0DCABF84ACED975E"
+            },
+            "max_adr_steps_per_change": 5,
+            "net_id": null,
+            "network_session_key": "03013FDBE38F233C0DCABF84ACED975E",
+            "region": "EU863",
+            "rx2_dr": 0,
+            "rx_delay": 1
+          },
+          "id": "ca413f3c-0e5b-44aa-aafa-79cba7226ee8"
+        }
+      ],
+      "tags": [
+        {
+          "stats": null,
+          "updated_at": "2024-08-07T08:23:51.839945Z",
+          "inserted_at": "2024-08-07T08:23:51.839945Z",
+          "group_interface_id": null,
+          "default_devices_view_id": null,
+          "default_packets_view_id": null,
+          "default_readings_view_id": null,
+          "default_graph_preset_id": null,
+          "default_layers_id": null,
+          "parent_id": "c3c478a0-9923-4755-8110-475104b4060d",
+          "mandate_id": "cc0b5ebc-6218-48a6-b0df-ff1d18894458",
+          "path": [
+            "03603d75-8ddb-4431-a20c-e97f56ea9c47",
+            "08737935-55ba-4bf0-b14a-62dca537aca2",
+            "c3c478a0-9923-4755-8110-475104b4060d",
+            "ef43d38a-6a37-4406-8ed1-99c3a5a36486"
+          ],
+          "slug": "stadt-dortmund-klimasensoren-aktiv-sht35",
+          "color_hue": 200,
+          "description": null,
+          "name": "Stadt Dortmund / Klimasensoren / aktiv / SHT35",
+          "id": "ef43d38a-6a37-4406-8ed1-99c3a5a36486"
+        }
+      ],
+      "last_readings": [],
+      "stats": {
+        "expires_at": null,
+        "dirty": null,
+        "mandate_id": "cc0b5ebc-6218-48a6-b0df-ff1d18894458",
+        "last_probe_ping": null,
+        "last_packet_forwarder_ping": null,
+        "missed_up_frames": "0",
+        "nominally_sending": true,
+        "avg_gw_count": "3.1000000000000000",
+        "packet_interval": {
+          "days": 0,
+          "microsecs": 388351,
+          "months": 0,
+          "secs": 233
+        },
+        "transceived_at": "2024-08-13T12:21:04.916219Z",
+        "avg_sf": 7.0,
+        "avg_rssi": -84.6,
+        "avg_snr": 8.49,
+        "id": "0126d246-05e1-43c7-a0df-3765cf982022"
+      },
+      "updated_at": "2024-08-12T09:55:41.044742Z",
+      "inserted_at": "2024-06-06T13:49:34.366775Z",
+      "deleted_at": null,
+      "default_packets_view_id": null,
+      "default_readings_view_id": null,
+      "template_id": null,
+      "default_graph_preset_id": null,
+      "default_layers_id": null,
+      "mandate_id": "cc0b5ebc-6218-48a6-b0df-ff1d18894458",
+      "parser_id": "4a9934f8-b35e-43ea-bdcd-aa210759bcad",
+      "static_location": false,
+      "icon": "devices",
+      "slug": "dec0054a6",
+      "meta": null,
+      "location": { "coordinates": [7.46607, 51.51116], "type": "Point" },
+      "name": "DEC0054A6",
+      "id": "0126d246-05e1-43c7-a0df-3765cf982022"
+    },
+    {
+      "interfaces": [
+        {
+          "deleted_at": null,
+          "driver_instance_id": "e51754d9-6779-4cd0-a314-84b5d876f833",
+          "device_id": "125f6b94-b470-4360-bf59-c4135cd573b4",
+          "enabled": true,
+          "meta": null,
+          "opts": {
+            "app_session_key": "58B360E3B6BA0BA08EEC16652EB853FF",
+            "check_fcnt": true,
+            "check_join_eui": true,
+            "class_c": false,
+            "device_address": "00E27D66",
+            "device_eui": "70B3D57BA00054B0",
+            "device_key": "81775417A749996A4CC787B534C05467",
+            "device_type": "otaa",
+            "gw_whitelist": null,
+            "join_eui": "70B3D57ED00006B2",
+            "lns_session_context": {
+              "a_fcnt_down": 70,
+              "app_s_key": "58B360E3B6BA0BA08EEC16652EB853FF",
+              "dev_addr": "00E27D66",
+              "f_nwk_s_int_key": "4A2E37A5A9D2839371C5BD9FF133C21A",
+              "fcnt_down": null,
+              "fcnt_up": 1479,
+              "n_fcnt_down": 0,
+              "nwk_s_enc_key": "4A2E37A5A9D2839371C5BD9FF133C21A",
+              "nwk_s_key": null,
+              "s_nwk_s_int_key": "4A2E37A5A9D2839371C5BD9FF133C21A"
+            },
+            "max_adr_steps_per_change": 5,
+            "net_id": null,
+            "network_session_key": "4A2E37A5A9D2839371C5BD9FF133C21A",
+            "region": "EU863",
+            "rx2_dr": 0,
+            "rx_delay": 1
+          },
+          "id": "90df0a54-2ccd-40bc-a811-adccc8dc013e"
+        }
+      ],
+      "tags": [
+        {
+          "stats": null,
+          "updated_at": "2024-08-07T08:23:51.839945Z",
+          "inserted_at": "2024-08-07T08:23:51.839945Z",
+          "group_interface_id": null,
+          "default_devices_view_id": null,
+          "default_packets_view_id": null,
+          "default_readings_view_id": null,
+          "default_graph_preset_id": null,
+          "default_layers_id": null,
+          "parent_id": "c3c478a0-9923-4755-8110-475104b4060d",
+          "mandate_id": "cc0b5ebc-6218-48a6-b0df-ff1d18894458",
+          "path": [
+            "03603d75-8ddb-4431-a20c-e97f56ea9c47",
+            "08737935-55ba-4bf0-b14a-62dca537aca2",
+            "c3c478a0-9923-4755-8110-475104b4060d",
+            "ef43d38a-6a37-4406-8ed1-99c3a5a36486"
+          ],
+          "slug": "stadt-dortmund-klimasensoren-aktiv-sht35",
+          "color_hue": 200,
+          "description": null,
+          "name": "Stadt Dortmund / Klimasensoren / aktiv / SHT35",
+          "id": "ef43d38a-6a37-4406-8ed1-99c3a5a36486"
+        }
+      ],
+      "last_readings": [],
+      "stats": {
+        "expires_at": null,
+        "dirty": null,
+        "mandate_id": "cc0b5ebc-6218-48a6-b0df-ff1d18894458",
+        "last_probe_ping": null,
+        "last_packet_forwarder_ping": null,
+        "missed_up_frames": "17",
+        "nominally_sending": true,
+        "avg_gw_count": "1.00000000000000000000",
+        "packet_interval": {
+          "days": 0,
+          "microsecs": 87110,
+          "months": 0,
+          "secs": 866
+        },
+        "transceived_at": "2024-08-13T12:21:21.687308Z",
+        "avg_sf": 7.0,
+        "avg_rssi": -114.3,
+        "avg_snr": -0.8,
+        "id": "125f6b94-b470-4360-bf59-c4135cd573b4"
+      },
+      "updated_at": "2024-08-12T10:09:28.541981Z",
+      "inserted_at": "2024-06-06T13:49:34.366775Z",
+      "deleted_at": null,
+      "default_packets_view_id": null,
+      "default_readings_view_id": null,
+      "template_id": null,
+      "default_graph_preset_id": null,
+      "default_layers_id": null,
+      "mandate_id": "cc0b5ebc-6218-48a6-b0df-ff1d18894458",
+      "parser_id": "4a9934f8-b35e-43ea-bdcd-aa210759bcad",
+      "static_location": false,
+      "icon": "devices",
+      "slug": "dec0054b0",
+      "meta": null,
+      "location": {
+        "coordinates": [7.504996593325032, 51.49119375557483],
+        "type": "Point"
+      },
+      "name": "DEC0054B0",
+      "id": "125f6b94-b470-4360-bf59-c4135cd573b4"
+    }
+  ],
+  "ok": true,
+  "status": 200
+}

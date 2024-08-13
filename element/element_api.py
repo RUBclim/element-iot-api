@@ -1,6 +1,7 @@
 import json
 import urllib.parse
 import urllib.request
+from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Annotated
@@ -30,7 +31,8 @@ T = TypeVar('T')
 class ElementApi:
     def __init__(self, api_location: str, api_key: str) -> None:
         """
-        Class to interact with the Elements API
+        Class to interact with the Elements API. The instance should, if
+        possible, passed to functions so the internal cache can be utilized.
 
         :param api_location: The location where the Elements API is hosted
             including the version e.g. ``https://dew21.element-iot.com/api/v1``
@@ -38,13 +40,18 @@ class ElementApi:
         """
         self.api_location = api_location.strip('/')
         self.api_key = api_key
-        self._id_to_address_mapping: dict[int, str] = {}
+        # the dict for caching looks like:
+        # {'foldername': {'decentlab_id': 'address'}, ...}
+        self._id_to_address_mapping: dict[str, dict[int, str]] = defaultdict(dict)  # noqa: E
 
     @property
-    def _address_to_id_mapping(self) -> dict[str, int]:
-        return {v: k for k, v in self._id_to_address_mapping.items()}
+    def _address_to_id_mapping(self) -> dict[str, dict[str, int]]:
+        return {
+            outer_k: {inner_v: inner_k for inner_k, inner_v in inner.items()}
+            for outer_k, inner in self._id_to_address_mapping.items()
+        }
 
-    def decentlab_id_from_address(self, address: str) -> int:
+    def decentlab_id_from_address(self, address: str, folder: str) -> int:
         """
         Get the decentlab id in the format of e.g. ``21680`` from the
         hexadecimal device address e.g. ``DEC0054B0``.
@@ -53,13 +60,17 @@ class ElementApi:
             retrieved from the devices's mac-address e.g. ``DEC0054B0``
         """
         # try to get the mapping from the cached values of the instance
-        decentlab_id = self._address_to_id_mapping.get(address)
+        # 1st check we have the folder:
+        folder_mapping = self._address_to_id_mapping.get(folder)
+        decentlab_id = folder_mapping.get(address) if folder_mapping else None
         # we don't know the id, try retrieving it from the API
         if decentlab_id is None:
             device = self.get_device(address)['body']
             decentlab_id = int(
                 device['fields']['gerateinformation']['seriennummer'],
             )
+            # we can also populate the cache this way
+            self._id_to_address_mapping[folder][decentlab_id] = address
 
         return decentlab_id
 
@@ -83,9 +94,12 @@ class ElementApi:
         :param folder: The folder in the Elements IoT system to query for this
             this can be e.g. ``'stadt-dortmund-klimasensoren-inaktiv-sht35'``
         """
-        # if we already have the mapping, simply return it without any requests
-        if self._id_to_address_mapping.get(decentlab_id):
-            return self._id_to_address_mapping[decentlab_id]
+        # if we already have the mapping, simply return it without making any
+        # requests to the API
+        # we may not even have the folder cached
+        folder_mapping = self._id_to_address_mapping.get(folder)
+        if folder_mapping and folder_mapping.get(decentlab_id):
+            return self._id_to_address_mapping[folder][decentlab_id]
 
         # first, get all available devices in the folder to potentially check
         # every single one of them manually.
@@ -93,7 +107,11 @@ class ElementApi:
         for i in devices['body']:
             curr_device_addr = i['name']
             # we can skip the ids we have already requested
-            if curr_device_addr in self._id_to_address_mapping.values():
+            curr_folder = self._id_to_address_mapping.get(folder)
+            if (
+                    curr_folder and
+                    curr_device_addr in self._id_to_address_mapping[folder].values()  # noqa: E501
+            ):
                 continue
 
             # now request some data from the device to get the device id
@@ -103,13 +121,13 @@ class ElementApi:
                 max_pages=1,
             )
             curr_decentlab_id = resp['body'][0]['data']['device_id']
-            self._id_to_address_mapping[curr_decentlab_id] = curr_device_addr
+            self._id_to_address_mapping[folder][curr_decentlab_id] = curr_device_addr  # noqa: E501
             if curr_decentlab_id == decentlab_id:
                 return curr_device_addr
         else:
             raise ValueError(
-                f'unable to find decentlab_id for '
-                f'station: {curr_device_addr!r}',
+                f'unable to find address for '
+                f'station: {decentlab_id!r}',
             )
 
     def _make_req(
@@ -118,7 +136,10 @@ class ElementApi:
             params: dict[str, str | None | int] = {},
             max_pages: int | None = None,
     ) -> ApiReturn[T]:
-        param_str = f"&{'&'.join([f'{k}={v}' for k, v in params.items()])}"
+        param_str = ''
+        if params:
+            param_str = f"&{'&'.join([f'{k}={v}' for k, v in params.items()])}"
+
         req = f'{self.api_location}/{route}?&auth={self.api_key}{param_str}'
         ret = urllib.request.urlopen(req, timeout=5)
         output_data: ApiReturn[T] = json.load(ret)
@@ -260,15 +281,6 @@ class ElementApi:
             max_pages=max_pages,
         )
         if as_dataframe:
-            try:
-                import pandas as pd
-            except ImportError as e:
-                e.add_note(
-                    'pandas has to be installed for this to work: '
-                    'pip install pandas',
-                )
-                raise
-
             # we need to manually add the measured_at (datetime) columns
             df_data = [
                 {'measured_at': i['measured_at'], **i['data']}

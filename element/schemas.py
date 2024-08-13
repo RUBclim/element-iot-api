@@ -124,19 +124,29 @@ class GatewayStats(TypedDict):
 
 
 class _DeviceInfo(TypedDict):
+    bemerkung: NotRequired[str]
     geratetyp: str
     hersteller: str
+    installiert_von: NotRequired[str]
+    ort: NotRequired[str]
+    plt: NotRequired[int]
     seriennummer: str  # this is stupid! it's an integer as a string...
+    strasse: NotRequired[str]
 
 
 class _Fields(TypedDict):
     gerateinformation: _DeviceInfo
 
 
+class Location(TypedDict):
+    coordinates: list[float]
+    type: Literal['Point']
+
+
 class Device(TypedDict):
     name: str
     slug: str
-    location: str | None
+    location: Location | None
     static_location: bool
     icon: str
     inserted_at: str
