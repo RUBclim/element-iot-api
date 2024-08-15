@@ -29,15 +29,16 @@ T = TypeVar('T')
 
 
 class ElementApi:
-    def __init__(self, api_location: str, api_key: str) -> None:
-        """
-        Class to interact with the Elements API. The instance should, if
-        possible, passed to functions so the internal cache can be utilized.
+    """
+    Class to interact with the Element API. The instance should be, if
+    possible, passed to functions so the internal cache can be utilized.
 
-        :param api_location: The location where the Elements API is hosted
-            including the version e.g. ``https://dew21.element-iot.com/api/v1``
-        :param: api_key: The API key as provided to you
-        """
+    :param api_location: The location where the Element API is hosted
+        including the version e.g. ``https://dew21.element-iot.com/api/v1``
+    :param api_key: The API key as provided to you
+    """
+
+    def __init__(self, api_location: str, api_key: str) -> None:
         self.api_location = api_location.strip('/')
         self.api_key = api_key
         # the dict for caching looks like:
@@ -51,26 +52,48 @@ class ElementApi:
             for outer_k, inner in self._id_to_address_mapping.items()
         }
 
-    def decentlab_id_from_address(self, address: str, folder: str) -> int:
+    def decentlab_id_from_address(
+            self,
+            address: str,
+            folder: str | None = None,
+    ) -> int:
         """
         Get the decentlab id in the format of e.g. ``21680`` from the
         hexadecimal device address e.g. ``DEC0054B0``.
 
         :param address: the address of the device in a hexadecimal format as
             retrieved from the devices's mac-address e.g. ``DEC0054B0``
+        :param folder: The folder in the Element IoT system to query for this
+            this can be e.g. ``'stadt-dortmund-klimasensoren-inaktiv-sht35'``
+            if not specified, searching the cache may be slower
         """
         # try to get the mapping from the cached values of the instance
-        # 1st check we have the folder:
-        folder_mapping = self._address_to_id_mapping.get(folder)
-        decentlab_id = folder_mapping.get(address) if folder_mapping else None
+        # check all cache folders. The address is unique compared to the
+        # decentlab_id, that's why we don't need the folder, but it's faster
+        decentlab_id = None
+        if folder is not None:
+            folder_mapping = self._address_to_id_mapping.get(folder)
+            decentlab_id = folder_mapping.get(
+                address,
+            ) if folder_mapping else None
+        else:
+            for folder in self._address_to_id_mapping:
+                folder_mapping = self._address_to_id_mapping[folder]
+                decentlab_id = folder_mapping.get(
+                    address,
+                ) if folder_mapping else None
+
         # we don't know the id, try retrieving it from the API
         if decentlab_id is None:
             device = self.get_device(address)['body']
             decentlab_id = int(
                 device['fields']['gerateinformation']['seriennummer'],
             )
-            # we can also populate the cache this way
-            self._id_to_address_mapping[folder][decentlab_id] = address
+            # we get the folder-slug via this API request so we can also
+            # populate the cache when no folder was specified
+            folder = device['tags'][0]['slug']
+        # we can also populate the cache this way
+        self._id_to_address_mapping[folder][decentlab_id] = address
 
         return decentlab_id
 
@@ -91,7 +114,7 @@ class ElementApi:
 
         :param decentlab_id: The decentlab serial nr/id in the format of e.g.
             ``21680``
-        :param folder: The folder in the Elements IoT system to query for this
+        :param folder: The folder in the Element IoT system to query for this
             this can be e.g. ``'stadt-dortmund-klimasensoren-inaktiv-sht35'``
         """
         # if we already have the mapping, simply return it without making any
@@ -167,12 +190,14 @@ class ElementApi:
         return output_data
 
     def get_folders(self) -> ApiReturn[list[Folder]]:
-        """Get the folders from the API as the raw return values"""
+        """Get the folders from the API as the raw return values. If you just
+        want the slugs (names), use :meth:`get_folder_slugs`.
+        """
         return self._make_req('tags')
 
     def get_folder_slugs(self) -> list[str]:
         """Get all available folder slugs. This can be:
-        ``stadt-dortmund-klimasensoren-inaktiv-sht35``
+        ``'stadt-dortmund-klimasensoren-inaktiv-sht35'``
         """
         ret = self.get_folders()
         return [i['slug'] for i in ret['body']]
@@ -185,7 +210,7 @@ class ElementApi:
         return self._make_req('/'.join(['tags', folder, 'devices']))
 
     def get_device_addresses(self, folder: str) -> list[str]:
-        """Get the hexadecimal addresses e.g. ``DEC0054B0``from all available
+        """Get the hexadecimal addresses e.g. ``DEC0054B0`` from all available
         devices in the folder(-slug)
 
         :param folder: The folder(-slug) to get the devices from
@@ -199,7 +224,7 @@ class ElementApi:
         :param address: the address of the device in a hexadecimal format as
             retrieved from the devices's mac-address e.g. ``DEC0054B0``, If
             only the ``decentlab_id`` is present, this may be retrieved using
-            :method:`address_from_decentlab_id`.
+            :meth:`address_from_decentlab_id`.
         """
         return self._make_req('/'.join(['devices', address.lower()]))
 
@@ -246,11 +271,11 @@ class ElementApi:
             as_dataframe: bool = False,
     ) -> ApiReturn[list[Reading]] | pd.DataFrame:
         """Get acutal readings from the API. This may be returned as the raw
-        API-return-value or already converted to a dataframe.
+        API-return-value or already converted to a :class:`pandas.DataFrame`.
 
         :param device_name: The name of the device as the hexadecimal address
             e.g. ``DEC0054B0``. If only the ``decentlab_id`` is present, this
-            may be retrieved using :method:`address_from_decentlab_id`.
+            may be retrieved using :meth:`address_from_decentlab_id`.
         :param sort: How the values should be sorted, currently this can only
             be ``measured_at`` or ``inserted_at``.
         :param sort_direction: The direction the sorting should be applied.
@@ -263,8 +288,9 @@ class ElementApi:
             1 and 100).
         :param max_pages: After how many pages of pagination we stop, to avoid
             infinitely requesting data from the API.
-        :param as_dataframe: Determines whether this function returns a pandas
-            ``DataFrame`` or the raw API return (which is the default)
+        :param as_dataframe: Determines whether this function returns a
+            :class:`pandas.DataFrame` or the raw API return
+            (which is the default)
         """
         params: dict[str, Any] = {
             'sort': sort,
@@ -297,10 +323,11 @@ class ElementApi:
         else:
             return data
 
-    def get_packets_by_device(
+    def get_packets(
             self,
-            device_name: str,
             *,
+            device_name: str | None = None,
+            folder: str | None = None,
             packet_type: Literal['up', 'down'] | None = None,
             start: datetime | None = None,
             end: datetime | None = None,
@@ -312,7 +339,11 @@ class ElementApi:
 
         :param device_name: The name of the device as the hexadecimal address
             e.g. ``DEC0054B0``. If only the ``decentlab_id`` is present, this
-            may be retrieved using :method:`address_from_decentlab_id`.
+            may be retrieved using :meth:`address_from_decentlab_id`. This is
+            mutually exclusive with ``folder``
+        :param folder: The folder in the Element IoT system to query for this
+            this can be e.g. ``'stadt-dortmund-klimasensoren-inaktiv-sht35'``.
+            This is mutually exclusive with ``device_name``
         :param packet_type: Filter for packet_types (either ``up`` or ``down``)
             if ``None`` all package types are returned
         :param start: The datetime to start getting readings for. If ``None``,
@@ -324,6 +355,16 @@ class ElementApi:
         :param max_pages: After how many pages of pagination we stop, to avoid
             infinitely requesting data from the API.
         """
+        if device_name is None and folder is None:
+            raise TypeError(
+                'one of device_name or folder needs to be specified',
+            )
+
+        if device_name is not None and folder is not None:
+            raise TypeError(
+                'only one of device_name or folder must be specified',
+            )
+
         params: dict[str, Any] = {'limit': limit}
         if packet_type:
             params['packet_type'] = packet_type
@@ -332,49 +373,13 @@ class ElementApi:
         if end:
             params['before'] = end.isoformat()
 
-        data: ApiReturn[list[Packet]] = self._make_req(
-            '/'.join(['devices', 'by-name', device_name, 'packets']),
-            params=params,
-            max_pages=max_pages,
-        )
-        return data
-
-    def get_packets_by_folder(
-            self,
-            folder: str,
-            *,
-            packet_type: Literal['up', 'down'] | None = None,
-            start: datetime | None = None,
-            end: datetime | None = None,
-            limit: Annotated[int, _ValueRange(1, 100)] = 100,
-            max_pages: int | None = None,
-    ) -> ApiReturn[list[Packet]]:
-        """Get the original packets from the API. This is returned as the raw
-        API-return-value. The sorting is fixed to ``transceived_at``.
-
-        :param folder: The folder in the Elements IoT system to query for this
-            this can be e.g. ``'stadt-dortmund-klimasensoren-inaktiv-sht35'``
-        :param packet_type: Filter for packet_types (either ``up`` or ``down``)
-            if ``None`` all package types are returned
-        :param start: The datetime to start getting readings for. If ``None``,
-            all available readings will be retrieved.
-        :param end: The datetime to stop getting readings for. If ``None``,
-            all available readings will be retrieved.
-        :param limit: How many values to fetch per API request (must be between
-            1 and 100).
-        :param max_pages: After how many pages of pagination we stop, to avoid
-            infinitely requesting data from the API.
-        """
-        params: dict[str, Any] = {'limit': limit}
-        if packet_type:
-            params['packet_type'] = packet_type
-        if start:
-            params['after'] = start.isoformat()
-        if end:
-            params['before'] = end.isoformat()
+        if device_name is not None:
+            route = '/'.join(['devices', 'by-name', device_name, 'packets'])
+        elif folder is not None:  # pragma: no branch
+            route = '/'.join(['tags', folder, 'packets'])
 
         data: ApiReturn[list[Packet]] = self._make_req(
-            '/'.join(['tags', folder, 'packets']),
+            route=route,
             params=params,
             max_pages=max_pages,
         )

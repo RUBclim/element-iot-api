@@ -132,3 +132,27 @@ def test_decode_ATM431() -> None:
             'value': -1.0,
         },
     }
+
+
+def test_decode_BLG_no_message() -> None:
+    data = decode_BLG(msg=b'0254970003498800830BF7', hex=True)
+    assert data == {
+        'Battery voltage': {
+            'unit': 'V',
+            'value': 3.063,
+        },
+        'Device ID': 21655,
+        'Protocol version': 2,
+        'Temperature': {
+            'unit': '°C',
+            'value': 47.728822273125274,
+        },
+        'Thermistor resistance': {
+            'unit': 'Ω',
+            'value': 36877.08418433659,
+        },
+        'Voltage ratio': {
+            'unit': None,
+            'value': 0.012840747833251953,
+        },
+    }

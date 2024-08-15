@@ -9,7 +9,6 @@ from math import log
 from typing import cast
 from typing import NotRequired
 from typing import TypedDict
-from typing import TypeVar
 
 
 class _Value(TypedDict):
@@ -238,10 +237,6 @@ DECODER_SCHEMAS: dict[str, list[SensorContainer]] = {
     ],
 }
 
-x = DECODER_SCHEMAS['ATM41'][0]['values']
-
-T = TypeVar('T')
-
 
 def _decode(
         msg: bytes,
@@ -294,10 +289,20 @@ def decode_BLG(
         hex: bool = False,
         protocol_version: int = 2,
 ) -> BLGMeasurement:
+    """Decode the message returned from the blackglobe sensor (BLG).
+
+    :param msg: byte-string returned e.g. ``b'0254970003498800830BF7'``
+    :param hex: whether or not the provided message is in hexadecimals
+    :param protocol_version: The expected version of the protocol. If the
+        ``protocol_version`` in the ``msg`` does not match this version, an
+        exception will be raised
+    """
     sensors = DECODER_SCHEMAS['BLG']
     ret = _decode(
-        msg=msg, protocol_version=protocol_version,
-        sensors=sensors, hex=hex,
+        msg=msg,
+        protocol_version=protocol_version,
+        sensors=sensors,
+        hex=hex,
     )
     return cast(BLGMeasurement, ret)
 
@@ -307,10 +312,21 @@ def decode_STH35(
         hex: bool = False,
         protocol_version: int = 2,
 ) -> SHT35Measurement:
+    """Decode the message returned from the temperature and relative humidity
+    sensor (SHT35).
+
+    :param msg: byte-string returned e.g. ``b'0254A60003783F596E0C17'``
+    :param hex: whether or not the provided message is in hexadecimals
+    :param protocol_version: The expected version of the protocol. If the
+        ``protocol_version`` in the ``msg`` does not match this version, an
+        exception will be raised
+    """
     sensors = DECODER_SCHEMAS['SHT35']
     ret = _decode(
-        msg=msg, protocol_version=protocol_version,
-        sensors=sensors, hex=hex,
+        msg=msg,
+        protocol_version=protocol_version,
+        sensors=sensors,
+        hex=hex,
     )
     return cast(SHT35Measurement, ret)
 
@@ -320,9 +336,21 @@ def decode_ATM41(
         hex: bool = False,
         protocol_version: int = 2,
 ) -> ATM41Measurement:
+    """Decode the message returned from the Meter ATM41 weather station (ATM41)
+    sensor.
+
+    :param msg: byte-string returned e.g.
+        ``b'02530400038283800080008000803488CD8076815C80CBA708816D817D80197FF680007FDB7FDB0AAE'``
+    :param hex: whether or not the provided message is in hexadecimals
+    :param protocol_version: The expected version of the protocol. If the
+        ``protocol_version`` in the ``msg`` does not match this version, an
+        exception will be raised
+    """
     sensors = DECODER_SCHEMAS['ATM41']
     ret = _decode(
-        msg=msg, protocol_version=protocol_version,
-        sensors=sensors, hex=hex,
+        msg=msg,
+        protocol_version=protocol_version,
+        sensors=sensors,
+        hex=hex,
     )
     return cast(ATM41Measurement, ret)

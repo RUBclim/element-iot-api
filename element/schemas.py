@@ -9,12 +9,44 @@ from typing import TypeVar
 # to have nice type checking and autocomplete
 
 
-class Data(TypedDict):
+class SHT35Data(TypedDict):
     air_humidity: float
     air_temperature: float
     battery_voltage: float
     device_id: int
     protocol_version: int
+
+
+class BLGData(TypedDict):
+    temperature: float
+    thermistor_resistance: float
+    voltage_ratio: float
+    battery_voltage: float
+    device_id: int
+    protocol_version: int
+
+
+class ATM41Data(TypedDict):
+    air_temperature: float
+    atmospheric_pressure: float
+    battery_voltage: float
+    compass_heading: int
+    device_id: int
+    east_wind_speed: float
+    lightning_average_distance: float
+    lightning_strike_count: int
+    maximum_wind_speed: float
+    north_wind_speed: float
+    precipitation: float
+    protocol_version: int
+    relative_humidity: float
+    sensor_temperature_internal: float
+    solar_radiation: float
+    vapor_pressure: float
+    wind_direction: float
+    wind_speed: float
+    x_orientation_angle: float
+    y_orientation_angle: float
 
 
 class Reading(TypedDict):
@@ -24,7 +56,7 @@ class Reading(TypedDict):
     location: str | None
     inserted_at: str
     measured_at: str
-    data: Data
+    data: SHT35Data | BLGData | ATM41Data
     id: str
 
 
@@ -203,7 +235,7 @@ class Meta(TypedDict):
 
 class Packet(TypedDict):
     id: str
-    payload: str | None
+    payload: bytes | None
     payload_encoding: Literal['json', 'binary', 'utf8'] | None
     packet_type: Literal['up', 'down']
     meta: Meta
@@ -221,6 +253,7 @@ T = TypeVar('T')
 
 
 class ApiReturn(TypedDict, Generic[T]):
+    """The generic structure of a return value from the API."""
     body: T
     ok: bool
     retrieve_after_id: NotRequired[str]

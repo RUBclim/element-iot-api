@@ -109,6 +109,27 @@ def test_decentlab_id_from_address_not_cached(
     'urllib.request.urlopen',
     return_value=_resp('testing/api_resp/device.json'),
 )
+def test_decentlab_id_from_address_folder_unknown(
+        m: MagicMock,
+        api: ElementApi,
+) -> None:
+    # check we have no cache
+    assert api._id_to_address_mapping == {}
+    decentlab_address = api.decentlab_id_from_address(address='DEC0054B0')
+    assert decentlab_address == 21680
+    m.assert_called_once_with(
+        'https://testing.element-iot.com/api/v1/devices/dec0054b0?&auth=123456789ABCDEFG',  # noqa: E501
+        timeout=5,
+    )
+    # check that the cache is now populated
+    folder = 'stadt-dortmund-klimasensoren-aktiv-sht35'
+    assert api._id_to_address_mapping[folder][21680] == 'DEC0054B0'
+
+
+@patch(
+    'urllib.request.urlopen',
+    return_value=_resp('testing/api_resp/device.json'),
+)
 def test_decentlab_id_from_address_in_cached(
         m: MagicMock,
         api: ElementApi,
@@ -390,7 +411,7 @@ def test_get_readings_raw_format(m: MagicMock, api: ElementApi) -> None:
     side_effect=[_resp('testing/api_resp/packets_by_device_DEC0054A6.json')],
 )
 def test_get_packets_by_device(m: MagicMock, api: ElementApi) -> None:
-    packets = api.get_packets_by_device(
+    packets = api.get_packets(
         device_name='DEC0054A6',
         packet_type='up',
         start=datetime(2024, 8, 13, 13, 5),
@@ -414,7 +435,7 @@ def test_get_packets_by_device(m: MagicMock, api: ElementApi) -> None:
 )
 def test_get_packets_by_folder(m: MagicMock, api: ElementApi) -> None:
     folder = 'stadt-dortmund-klimasensoren-aktiv-sht35'
-    packets = api.get_packets_by_folder(
+    packets = api.get_packets(
         folder=folder,
         packet_type='up',
         start=datetime(2024, 8, 13, 13, 5),
@@ -430,3 +451,19 @@ def test_get_packets_by_folder(m: MagicMock, api: ElementApi) -> None:
     assert packets == json.load(
         _resp('testing/api_resp/packets_by_folder.json'),
     )
+
+
+def test_get_packet_no_device_name_and_folder_set(api: ElementApi) -> None:
+    with pytest.raises(TypeError) as exc_info:
+        api.get_packets()
+
+    msg, = exc_info.value.args
+    assert msg == 'one of device_name or folder needs to be specified'
+
+
+def test_get_packet_device_name_and_folder_set(api: ElementApi) -> None:
+    with pytest.raises(TypeError) as exc_info:
+        api.get_packets(device_name='DEC0054A6', folder='some-folder-name')
+
+    msg, = exc_info.value.args
+    assert msg == 'only one of device_name or folder must be specified'
