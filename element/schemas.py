@@ -161,9 +161,10 @@ class _DeviceInfo(TypedDict):
     hersteller: str
     installiert_von: NotRequired[str]
     ort: NotRequired[str]
-    plt: NotRequired[int]
+    plz: NotRequired[int]
     seriennummer: str  # this is stupid! it's an integer as a string...
     strasse: NotRequired[str]
+    hausnummer: NotRequired[str]
 
 
 class _Fields(TypedDict):

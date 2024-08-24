@@ -1,6 +1,7 @@
 import io
 import json
 from datetime import datetime
+from datetime import timezone
 from typing import Any
 from unittest.mock import call
 from unittest.mock import MagicMock
@@ -327,7 +328,7 @@ def test_get_readings_as_dataframe(m: MagicMock, api: ElementApi) -> None:
         device_name='DEC0054A6',
         sort='measured_at',
         sort_direction='asc',
-        start=datetime(2024, 8, 13, 13, 5),
+        start=datetime(2024, 8, 13, 13, 5, tzinfo=timezone.utc),
         end=datetime(2024, 8, 13, 13, 15),
         limit=100,
         max_pages=None,
@@ -352,7 +353,7 @@ def test_get_readings_as_dataframe(m: MagicMock, api: ElementApi) -> None:
     assert_frame_equal(left=data, right=expected_df)
     assert m.call_count == 1
     assert m.call_args_list[0] == call(
-        'https://testing.element-iot.com/api/v1/devices/by-name/DEC0054A6/readings?&auth=123456789ABCDEFG&sort=measured_at&sort_direction=asc&limit=100&after=2024-08-13T13:05:00&before=2024-08-13T13:15:00',  # noqa: E501
+        'https://testing.element-iot.com/api/v1/devices/by-name/DEC0054A6/readings?&auth=123456789ABCDEFG&sort=measured_at&sort_direction=asc&limit=100&after=2024-08-13T13:05:00Z&before=2024-08-13T13:15:00',  # noqa: E501
         timeout=5,
     )
 

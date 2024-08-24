@@ -298,9 +298,9 @@ class ElementApi:
             'limit': limit,
         }
         if start:
-            params['after'] = start.isoformat()
+            params['after'] = start.isoformat().replace('+00:00', 'Z')
         if end:
-            params['before'] = end.isoformat()
+            params['before'] = end.isoformat().replace('+00:00', 'Z')
 
         data: ApiReturn[list[Reading]] = self._make_req(
             '/'.join(['devices', 'by-name', device_name, 'readings']),
@@ -369,9 +369,9 @@ class ElementApi:
         if packet_type:
             params['packet_type'] = packet_type
         if start:
-            params['after'] = start.isoformat()
+            params['after'] = start.isoformat().replace('+00:00', 'Z')
         if end:
-            params['before'] = end.isoformat()
+            params['before'] = end.isoformat().replace('+00:00', 'Z')
 
         if device_name is not None:
             route = '/'.join(['devices', 'by-name', device_name, 'packets'])
