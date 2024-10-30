@@ -1,5 +1,5 @@
 [![ci](https://github.com/RUBclim/element-api/actions/workflows/ci.yml/badge.svg)](https://github.com/RUBclim/element-api/actions/workflows/ci.yml)
-[![pre-commit](https://github.com/RUBclim/element-api/actions/workflows/pre-commit.yaml/badge.svg)](https://github.com/RUBclim/element-api/actions?query=workflow%3Apre-commit)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/RUBclim/element-api/main.svg)](https://results.pre-commit.ci/latest/github/RUBclim/element-api/main)
 
 # element-api
 
