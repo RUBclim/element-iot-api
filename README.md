@@ -1,10 +1,10 @@
 [![ci](https://github.com/RUBclim/element-api/actions/workflows/ci.yml/badge.svg)](https://github.com/RUBclim/element-api/actions/workflows/ci.yml)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/RUBclim/element-api/main.svg)](https://results.pre-commit.ci/latest/github/RUBclim/element-api/main)
+[![deploy docs to gh-page](https://github.com/RUBclim/element-api/actions/workflows/pages.yaml/badge.svg)](https://github.com/RUBclim/element-api/actions/workflows/pages.yaml)
 
 # element-api
 
-**A separate sphinx documentation exists but is not deployed. It can be build using
-`tox -e docs`**
+**A separate sphinx documentation exists and can be found here: [Docs](https://rubclim.github.io/element-api)**
 
 ## Installation
 
