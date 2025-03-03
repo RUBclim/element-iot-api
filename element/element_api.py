@@ -165,7 +165,20 @@ class ElementApi:
 
         req = f'{self.api_location}/{route}?&auth={self.api_key}{param_str}'
         ret = urllib.request.urlopen(req, timeout=5)
-        output_data: ApiReturn[T] = json.load(ret)
+        if '/stream' in route:
+            body = []
+            chunk = ret.readline()
+            while chunk:
+                body.append(json.loads(chunk))
+                chunk = ret.readline()
+
+            output_data: ApiReturn[T] = {
+                'body': body,  # type: ignore[typeddict-item]
+                'ok': True,
+                'status': 200,
+            }
+        else:
+            output_data = json.load(ret)
         # check if the request is paginated
         retrieve_after_id = output_data.get('retrieve_after_id')
         i = 1
@@ -239,6 +252,7 @@ class ElementApi:
             end: datetime | None = None,
             limit: Annotated[int, _ValueRange(1, 100)] = 100,
             max_pages: int | None = None,
+            stream: bool = False,
             as_dataframe: Literal[True],
     ) -> pd.DataFrame:
         ...
@@ -254,6 +268,7 @@ class ElementApi:
             end: datetime | None = None,
             limit: Annotated[int, _ValueRange(1, 100)] = 100,
             max_pages: int | None = None,
+            stream: bool = False,
             as_dataframe: Literal[False] = False,
     ) -> ApiReturn[list[Reading]]:
         ...
@@ -268,6 +283,7 @@ class ElementApi:
             end: datetime | None = None,
             limit: Annotated[int, _ValueRange(1, 100)] = 100,
             max_pages: int | None = None,
+            stream: bool = False,
             as_dataframe: bool = False,
     ) -> ApiReturn[list[Reading]] | pd.DataFrame:
         """Get acutal readings from the API. This may be returned as the raw
@@ -288,6 +304,9 @@ class ElementApi:
             1 and 100).
         :param max_pages: After how many pages of pagination we stop, to avoid
             infinitely requesting data from the API.
+        :param stream: Whether to stream the data or not. This is useful for
+            very large datasets. ``limit`` is ignored when streaming, use
+            ``start`` and ``end`` to limit the data.
         :param as_dataframe: Determines whether this function returns a
             :class:`pandas.DataFrame` or the raw API return
             (which is the default)
@@ -302,11 +321,23 @@ class ElementApi:
         if end:
             params['before'] = end.isoformat().replace('+00:00', 'Z')
 
-        data: ApiReturn[list[Reading]] = self._make_req(
-            '/'.join(['devices', 'by-name', device_name, 'readings']),
-            params=params,
-            max_pages=max_pages,
-        )
+        data: ApiReturn[list[Reading]]
+        if stream is False:
+            data = self._make_req(
+                '/'.join(['devices', 'by-name', device_name, 'readings']),
+                params=params,
+                max_pages=max_pages,
+            )
+        else:
+            params.pop('limit')
+            data = self._make_req(
+                '/'.join([
+                    'devices', 'by-name', device_name,
+                    'readings', 'stream',
+                ]),
+                params=params,
+                max_pages=max_pages,
+            )
         if as_dataframe:
             # we need to manually add the measured_at (datetime) columns
             df_data = [
@@ -332,6 +363,7 @@ class ElementApi:
             start: datetime | None = None,
             end: datetime | None = None,
             limit: Annotated[int, _ValueRange(1, 100)] = 100,
+            stream: bool = False,
             max_pages: int | None = None,
     ) -> ApiReturn[list[Packet]]:
         """Get the original packets from the API. This is returned as the raw
@@ -352,6 +384,9 @@ class ElementApi:
             all available readings will be retrieved.
         :param limit: How many values to fetch per API request (must be between
             1 and 100).
+        :param stream: Whether to stream the data or not. This is useful for
+            very large datasets. ``limit`` is ignored when streaming, use
+            ``start`` and ``end`` to limit the data.
         :param max_pages: After how many pages of pagination we stop, to avoid
             infinitely requesting data from the API.
         """
@@ -374,9 +409,15 @@ class ElementApi:
             params['before'] = end.isoformat().replace('+00:00', 'Z')
 
         if device_name is not None:
-            route = '/'.join(['devices', 'by-name', device_name, 'packets'])
+            path_comps = ['devices', 'by-name', device_name, 'packets']
         elif folder is not None:  # pragma: no branch
-            route = '/'.join(['tags', folder, 'packets'])
+            path_comps = ['tags', folder, 'packets']
+
+        if stream is True:
+            params.pop('limit')
+            path_comps.append('stream')
+
+        route = '/'.join(path_comps)
 
         data: ApiReturn[list[Packet]] = self._make_req(
             route=route,
