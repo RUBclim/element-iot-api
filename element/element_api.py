@@ -175,7 +175,7 @@ class ElementApi:
                 chunk = ret.readline()
 
             # after retrieval check if it was successful
-            if 'error' in body[-1]:
+            if body and 'error' in body[-1]:
                 raise HTTPError(
                     url=req,
                     code=408,

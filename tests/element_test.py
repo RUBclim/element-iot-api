@@ -435,6 +435,26 @@ def test_get_readings_streamed(m: MagicMock, api: ElementApi) -> None:
     )
 
 
+@patch('urllib.request.urlopen', side_effect=[io.BytesIO(b'')])
+def test_get_readings_streamed_no_data(m: MagicMock, api: ElementApi) -> None:
+    raw_data = api.get_readings(
+        device_name='DEC0054A6',
+        sort='measured_at',
+        sort_direction='asc',
+        start=datetime(2024, 8, 13, 13, 5),
+        end=datetime(2024, 8, 13, 13, 15),
+        max_pages=None,
+        as_dataframe=False,
+        stream=True,
+    )
+    assert m.call_count == 1
+    assert m.call_args_list[0] == call(
+        'https://testing.element-iot.com/api/v1/devices/by-name/DEC0054A6/readings/stream?&auth=123456789ABCDEFG&sort=measured_at&sort_direction=asc&after=2024-08-13T13:05:00&before=2024-08-13T13:15:00',  # noqa: E501
+        timeout=5,
+    )
+    assert raw_data == {'body': [], 'ok': True, 'status': 200}
+
+
 @patch(
     'urllib.request.urlopen',
     side_effect=[
@@ -534,6 +554,28 @@ def test_get_packets_by_folder_streamed(m: MagicMock, api: ElementApi) -> None:
     assert packets == json.load(
         _resp('testing/api_resp/packets_by_folder.json'),
     )
+
+
+@patch('urllib.request.urlopen', side_effect=[io.BytesIO(b'')])
+def test_get_packets_by_folder_streamed_no_data(
+        m: MagicMock,
+        api: ElementApi,
+) -> None:
+    folder = 'stadt-dortmund-klimasensoren-aktiv-sht35'
+    packets = api.get_packets(
+        folder=folder,
+        packet_type='up',
+        start=datetime(2024, 8, 13, 13, 5),
+        end=datetime(2024, 8, 13, 13, 15),
+        max_pages=None,
+        stream=True,
+    )
+    assert m.call_count == 1
+    assert m.call_args_list[0] == call(
+        'https://testing.element-iot.com/api/v1/tags/stadt-dortmund-klimasensoren-aktiv-sht35/packets/stream?&auth=123456789ABCDEFG&packet_type=up&after=2024-08-13T13:05:00&before=2024-08-13T13:15:00',  # noqa: E501
+        timeout=5,
+    )
+    assert packets == {'body': [], 'ok': True, 'status': 200}
 
 
 @patch(
