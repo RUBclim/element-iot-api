@@ -9,6 +9,7 @@ from typing import Any
 from typing import Literal
 from typing import overload
 from typing import TypeVar
+from urllib.error import HTTPError
 
 import pandas as pd
 
@@ -169,8 +170,19 @@ class ElementApi:
             body = []
             chunk = ret.readline()
             while chunk:
-                body.append(json.loads(chunk))
+                parsed = json.loads(chunk)
+                body.append(parsed)
                 chunk = ret.readline()
+
+            # after retrieval check if it was successful
+            if 'error' in body[-1]:
+                raise HTTPError(
+                    url=req,
+                    code=408,
+                    msg=parsed['error'],
+                    hdrs={},  # type: ignore[arg-type]
+                    fp=None,
+                )
 
             output_data: ApiReturn[T] = {
                 'body': body,  # type: ignore[typeddict-item]
@@ -253,6 +265,7 @@ class ElementApi:
             limit: Annotated[int, _ValueRange(1, 100)] = 100,
             max_pages: int | None = None,
             stream: bool = False,
+            timeout: Annotated[int | None, _ValueRange(250, 180000)] = None,
             as_dataframe: Literal[True],
     ) -> pd.DataFrame:
         ...
@@ -269,6 +282,7 @@ class ElementApi:
             limit: Annotated[int, _ValueRange(1, 100)] = 100,
             max_pages: int | None = None,
             stream: bool = False,
+            timeout: Annotated[int | None, _ValueRange(250, 180000)] = None,
             as_dataframe: Literal[False] = False,
     ) -> ApiReturn[list[Reading]]:
         ...
@@ -284,6 +298,7 @@ class ElementApi:
             limit: Annotated[int, _ValueRange(1, 100)] = 100,
             max_pages: int | None = None,
             stream: bool = False,
+            timeout: Annotated[int | None, _ValueRange(250, 180000)] = None,
             as_dataframe: bool = False,
     ) -> ApiReturn[list[Reading]] | pd.DataFrame:
         """Get acutal readings from the API. This may be returned as the raw
@@ -307,6 +322,9 @@ class ElementApi:
         :param stream: Whether to stream the data or not. This is useful for
             very large datasets. ``limit`` is ignored when streaming, use
             ``start`` and ``end`` to limit the data.
+        :param timeout: The timeout for the request in milliseconds. The server
+            will close the connection after this time. This sometimes needs to
+            be increased for very large datasets.
         :param as_dataframe: Determines whether this function returns a
             :class:`pandas.DataFrame` or the raw API return
             (which is the default)
@@ -320,6 +338,8 @@ class ElementApi:
             params['after'] = start.isoformat().replace('+00:00', 'Z')
         if end:
             params['before'] = end.isoformat().replace('+00:00', 'Z')
+        if timeout is not None:
+            params['timeout'] = timeout
 
         data: ApiReturn[list[Reading]]
         if stream is False:
@@ -364,6 +384,7 @@ class ElementApi:
             end: datetime | None = None,
             limit: Annotated[int, _ValueRange(1, 100)] = 100,
             stream: bool = False,
+            timeout: Annotated[int | None, _ValueRange(250, 180000)] = None,
             max_pages: int | None = None,
     ) -> ApiReturn[list[Packet]]:
         """Get the original packets from the API. This is returned as the raw
@@ -387,6 +408,10 @@ class ElementApi:
         :param stream: Whether to stream the data or not. This is useful for
             very large datasets. ``limit`` is ignored when streaming, use
             ``start`` and ``end`` to limit the data.
+        :param timeout: The timeout for the request in milliseconds. The server
+            will close the connection after this time. This sometimes needs to
+            be increased for very large datasets. It must be at least 250 ms
+            and at most 180000 ms.
         :param max_pages: After how many pages of pagination we stop, to avoid
             infinitely requesting data from the API.
         """
@@ -407,6 +432,8 @@ class ElementApi:
             params['after'] = start.isoformat().replace('+00:00', 'Z')
         if end:
             params['before'] = end.isoformat().replace('+00:00', 'Z')
+        if timeout is not None:
+            params['timeout'] = timeout
 
         if device_name is not None:
             path_comps = ['devices', 'by-name', device_name, 'packets']
