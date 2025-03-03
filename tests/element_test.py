@@ -6,6 +6,7 @@ from typing import Any
 from unittest.mock import call
 from unittest.mock import MagicMock
 from unittest.mock import patch
+from urllib.error import HTTPError
 
 import pandas as pd
 import pytest
@@ -409,6 +410,83 @@ def test_get_readings_raw_format(m: MagicMock, api: ElementApi) -> None:
 
 @patch(
     'urllib.request.urlopen',
+    side_effect=[
+        _resp('testing/api_resp/readings_DEC0054A6_short_streamed.txt'),
+    ],
+)
+def test_get_readings_streamed(m: MagicMock, api: ElementApi) -> None:
+    raw_data = api.get_readings(
+        device_name='DEC0054A6',
+        sort='measured_at',
+        sort_direction='asc',
+        start=datetime(2024, 8, 13, 13, 5),
+        end=datetime(2024, 8, 13, 13, 15),
+        max_pages=None,
+        as_dataframe=False,
+        stream=True,
+    )
+    assert m.call_count == 1
+    assert m.call_args_list[0] == call(
+        'https://testing.element-iot.com/api/v1/devices/by-name/DEC0054A6/readings/stream?&auth=123456789ABCDEFG&sort=measured_at&sort_direction=asc&after=2024-08-13T13:05:00&before=2024-08-13T13:15:00',  # noqa: E501
+        timeout=5,
+    )
+    assert raw_data == json.load(
+        _resp('testing/api_resp/readings_DEC0054A6_short.json'),
+    )
+
+
+@patch('urllib.request.urlopen', side_effect=[io.BytesIO(b'')])
+def test_get_readings_streamed_no_data(m: MagicMock, api: ElementApi) -> None:
+    raw_data = api.get_readings(
+        device_name='DEC0054A6',
+        sort='measured_at',
+        sort_direction='asc',
+        start=datetime(2024, 8, 13, 13, 5),
+        end=datetime(2024, 8, 13, 13, 15),
+        max_pages=None,
+        as_dataframe=False,
+        stream=True,
+    )
+    assert m.call_count == 1
+    assert m.call_args_list[0] == call(
+        'https://testing.element-iot.com/api/v1/devices/by-name/DEC0054A6/readings/stream?&auth=123456789ABCDEFG&sort=measured_at&sort_direction=asc&after=2024-08-13T13:05:00&before=2024-08-13T13:15:00',  # noqa: E501
+        timeout=5,
+    )
+    assert raw_data == {'body': [], 'ok': True, 'status': 200}
+
+
+@patch(
+    'urllib.request.urlopen',
+    side_effect=[
+        _resp('testing/api_resp/readings_DEC0054A6_short_streamed_error.txt'),
+    ],
+)
+def test_get_readings_timeout_streamed(m: MagicMock, api: ElementApi) -> None:
+    with pytest.raises(HTTPError) as exc_info:
+        api.get_readings(
+            device_name='DEC0054A6',
+            sort='measured_at',
+            sort_direction='asc',
+            start=datetime(2024, 8, 13, 13, 5),
+            end=datetime(2024, 8, 13, 13, 15),
+            max_pages=None,
+            as_dataframe=False,
+            stream=True,
+            timeout=250,
+        )
+    assert m.call_count == 1
+    assert m.call_args_list[0] == call(
+        'https://testing.element-iot.com/api/v1/devices/by-name/DEC0054A6/readings/stream?&auth=123456789ABCDEFG&sort=measured_at&sort_direction=asc&after=2024-08-13T13:05:00&before=2024-08-13T13:15:00&timeout=250',  # noqa: E501
+        timeout=5,
+    )
+    assert exc_info.value.msg == (
+        'Database timeout. Try allowing more time by using the timeout query '
+        'param (in milliseconds). Current timeout: 250.'
+    )
+
+
+@patch(
+    'urllib.request.urlopen',
     side_effect=[_resp('testing/api_resp/packets_by_device_DEC0054A6.json')],
 )
 def test_get_packets_by_device(m: MagicMock, api: ElementApi) -> None:
@@ -451,6 +529,81 @@ def test_get_packets_by_folder(m: MagicMock, api: ElementApi) -> None:
     )
     assert packets == json.load(
         _resp('testing/api_resp/packets_by_folder.json'),
+    )
+
+
+@patch(
+    'urllib.request.urlopen',
+    side_effect=[_resp('testing/api_resp/packets_by_folder_streamed.txt')],
+)
+def test_get_packets_by_folder_streamed(m: MagicMock, api: ElementApi) -> None:
+    folder = 'stadt-dortmund-klimasensoren-aktiv-sht35'
+    packets = api.get_packets(
+        folder=folder,
+        packet_type='up',
+        start=datetime(2024, 8, 13, 13, 5),
+        end=datetime(2024, 8, 13, 13, 15),
+        max_pages=None,
+        stream=True,
+    )
+    assert m.call_count == 1
+    assert m.call_args_list[0] == call(
+        'https://testing.element-iot.com/api/v1/tags/stadt-dortmund-klimasensoren-aktiv-sht35/packets/stream?&auth=123456789ABCDEFG&packet_type=up&after=2024-08-13T13:05:00&before=2024-08-13T13:15:00',  # noqa: E501
+        timeout=5,
+    )
+    assert packets == json.load(
+        _resp('testing/api_resp/packets_by_folder.json'),
+    )
+
+
+@patch('urllib.request.urlopen', side_effect=[io.BytesIO(b'')])
+def test_get_packets_by_folder_streamed_no_data(
+        m: MagicMock,
+        api: ElementApi,
+) -> None:
+    folder = 'stadt-dortmund-klimasensoren-aktiv-sht35'
+    packets = api.get_packets(
+        folder=folder,
+        packet_type='up',
+        start=datetime(2024, 8, 13, 13, 5),
+        end=datetime(2024, 8, 13, 13, 15),
+        max_pages=None,
+        stream=True,
+    )
+    assert m.call_count == 1
+    assert m.call_args_list[0] == call(
+        'https://testing.element-iot.com/api/v1/tags/stadt-dortmund-klimasensoren-aktiv-sht35/packets/stream?&auth=123456789ABCDEFG&packet_type=up&after=2024-08-13T13:05:00&before=2024-08-13T13:15:00',  # noqa: E501
+        timeout=5,
+    )
+    assert packets == {'body': [], 'ok': True, 'status': 200}
+
+
+@patch(
+    'urllib.request.urlopen',
+    side_effect=[
+        _resp('testing/api_resp/packets_by_folder_streamed_error.txt'),
+    ],
+)
+def test_get_packets_by_folder_streamed_error(
+        m: MagicMock,
+        api: ElementApi,
+) -> None:
+    folder = 'stadt-dortmund-klimasensoren-aktiv-sht35'
+    with pytest.raises(HTTPError) as exc_info:
+        api.get_packets(
+            folder=folder,
+            max_pages=None,
+            stream=True,
+            timeout=250,
+        )
+    assert m.call_count == 1
+    assert m.call_args_list[0] == call(
+        'https://testing.element-iot.com/api/v1/tags/stadt-dortmund-klimasensoren-aktiv-sht35/packets/stream?&auth=123456789ABCDEFG&timeout=250',  # noqa: E501
+        timeout=5,
+    )
+    assert exc_info.value.msg == (
+        'Database timeout. Try allowing more time by using the timeout query '
+        'param (in milliseconds). Current timeout: 250.'
     )
 
 
