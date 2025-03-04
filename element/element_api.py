@@ -366,7 +366,10 @@ class ElementApi:
             ]
             df = pd.DataFrame(df_data)
             if not df.empty:
-                df['measured_at'] = pd.to_datetime(df['measured_at'])
+                df['measured_at'] = pd.to_datetime(
+                    df['measured_at'],
+                    format='mixed',
+                )
                 df = df.set_index('measured_at')
             else:
                 print(f'no data for {device_name!r}')
