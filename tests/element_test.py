@@ -361,6 +361,49 @@ def test_get_readings_as_dataframe(m: MagicMock, api: ElementApi) -> None:
 
 @patch(
     'urllib.request.urlopen',
+    side_effect=[
+        _resp('testing/api_resp/readings_DEC0054A6_short_streamediso8601.txt'),
+    ],
+)
+def test_get_readings_as_dataframe_stream_inconsistent_date(
+        m: MagicMock,
+        api: ElementApi,
+) -> None:
+    data = api.get_readings(
+        device_name='DEC0054A6',
+        sort='measured_at',
+        sort_direction='asc',
+        start=datetime(2024, 8, 13, 13, 5, tzinfo=timezone.utc),
+        end=datetime(2024, 8, 13, 13, 15),
+        as_dataframe=True,
+        stream=True,
+    )
+    expected_df = pd.DataFrame(
+        {
+            'air_humidity': [34.934005, 38.171969],
+            'air_temperature': [37.200732, 35.350195],
+            'battery_voltage': [3.095, 3.095],
+            'device_id': [21670, 21670],
+            'protocol_version': [2, 2],
+        },
+        index=pd.DatetimeIndex(
+            [
+                '2024-08-13 13:06:03.622052+00:00',
+                '2024-08-13 13:11:04+00:00',
+            ],
+        ),
+    )
+    expected_df.index.name = 'measured_at'
+    assert_frame_equal(left=data, right=expected_df)
+    assert m.call_count == 1
+    assert m.call_args_list[0] == call(
+        'https://testing.element-iot.com/api/v1/devices/by-name/DEC0054A6/readings/stream?&auth=123456789ABCDEFG&sort=measured_at&sort_direction=asc&after=2024-08-13T13:05:00Z&before=2024-08-13T13:15:00',  # noqa: E501
+        timeout=5,
+    )
+
+
+@patch(
+    'urllib.request.urlopen',
     side_effect=[_resp('testing/api_resp/empty_resp.json')],
 )
 def test_get_readings_as_dataframe_not_data_for_device(
