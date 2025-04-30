@@ -22,7 +22,7 @@ project = 'element-api'
 copyright = f'2024 - {date.today().year}, Jonas Kittner & Contributors'
 
 # The full version, including alpha/beta/rc tags
-release = '0.2.1'
+release = '1.0.0'
 
 
 # -- General configuration ---------------------------------------------------
