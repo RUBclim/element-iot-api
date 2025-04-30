@@ -4,7 +4,8 @@
 
 # element-api
 
-**A separate sphinx documentation exists and can be found here: [Docs](https://rubclim.github.io/element-api)**
+**A separate sphinx documentation exists and can be found here:
+[Docs](https://rubclim.github.io/element-api)**
 
 ## Installation
 
@@ -46,7 +47,7 @@ df = api.get_readings(
     device_name='DEC005304',
     start=datetime(2024, 8, 15, 9, 0),
     end=datetime(2024, 8, 15, 10, 0),
-   as_dataframe=True,
+    as_dataframe=True,
 )
 ```
 
@@ -162,10 +163,10 @@ raw API response or already a `pandas.DataFrame`.
 
 ```python
 data = api.get_readings(
-   device_name='DEC0054C6',
-   start=datetime(2024, 8, 1, 0, 0),
-   end=datetime(2024, 8, 10, 0, 0),
-   as_dataframe=True,
+    device_name='DEC0054C6',
+    start=datetime(2024, 8, 1, 0, 0),
+    end=datetime(2024, 8, 10, 0, 0),
+    as_dataframe=True,
 )
 ```
 
@@ -186,10 +187,10 @@ measurements, you need to specify `packet_type='up'`, for uplink packages.
 
 ```python
 packets = api.get_packets(
-   folder='stadt-dortmund-klimasensoren-aktiv-sht35',
-   packet_type='up',
-   start=datetime(2024, 8, 1, 0, 0),
-   end=datetime(2024, 8, 10, 0, 0),
+    folder='stadt-dortmund-klimasensoren-aktiv-sht35',
+    packet_type='up',
+    start=datetime(2024, 8, 1, 0, 0),
+    end=datetime(2024, 8, 10, 0, 0),
 )
 ```
 
@@ -249,7 +250,7 @@ Use `element.parsers.decode_ATM41` to decode a message from the SHT35 sensor.
 
 ```python
 data = decode_ATM41(
-   msg=b'02530400038283800080008000803488CD8076815C80CBA708816D817D80197FF680007FDB7FDB0AAE',
-   hex=True,
+    msg=b'02530400038283800080008000803488CD8076815C80CBA708816D817D80197FF680007FDB7FDB0AAE',
+    hex=True,
 )
 ```

@@ -57,7 +57,7 @@ df = api.get_readings(
     device_name='DEC005304',
     start=datetime(2024, 8, 15, 9, 0),
     end=datetime(2024, 8, 15, 10, 0),
-   as_dataframe=True,
+    as_dataframe=True,
 )
 ```
 
@@ -174,10 +174,10 @@ the raw API response or already a {class}`pandas.DataFrame`.
 
 ```python
 data = api.get_readings(
-   device_name='DEC0054C6',
-   start=datetime(2024, 8, 1, 0, 0),
-   end=datetime(2024, 8, 10, 0, 0),
-   as_dataframe=True,
+    device_name='DEC0054C6',
+    start=datetime(2024, 8, 1, 0, 0),
+    end=datetime(2024, 8, 10, 0, 0),
+    as_dataframe=True,
 )
 ```
 
@@ -187,6 +187,12 @@ Additionally, you may specify the following keyword-arguments:
 - **sort_direction**: either `asc` or `desc`
 - **limit**: how many value to fetch per paginated request
 - **max_page**: how many pages of pagination to get maximum to avoid infinite pagination
+- **timeout**: Tells the server when to timeout the requests. For large data downloads
+  via streaming this should be a larger value, otherwise only parts of the available
+  data are downloaded. Once the timeout is reached, the server terminates the stream
+  with a json-message.
+- **stream**: whether or not to stream the data instead of paginated requests. This will
+  allow a faster download of large amounts of data
 
 #### From packets
 
@@ -198,10 +204,10 @@ measurements, you need to specify `packet_type='up'`, for uplink packages.
 
 ```python
 packets = api.get_packets(
-   folder='stadt-dortmund-klimasensoren-aktiv-sht35',
-   packet_type='up',
-   start=datetime(2024, 8, 1, 0, 0),
-   end=datetime(2024, 8, 10, 0, 0),
+    folder='stadt-dortmund-klimasensoren-aktiv-sht35',
+    packet_type='up',
+    start=datetime(2024, 8, 1, 0, 0),
+    end=datetime(2024, 8, 10, 0, 0),
 )
 ```
 
@@ -261,8 +267,8 @@ Use {func}`element.parsers.decode_ATM41` to decode a message from the SHT35 sens
 
 ```python
 data = decode_ATM41(
-   msg=b'02530400038283800080008000803488CD8076815C80CBA708816D817D80197FF680007FDB7FDB0AAE',
-   hex=True,
+    msg=b'02530400038283800080008000803488CD8076815C80CBA708816D817D80197FF680007FDB7FDB0AAE',
+    hex=True,
 )
 ```
 
