@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'element-api'
+project = 'element-iot-api'
 copyright = f'2024 - {date.today().year}, Jonas Kittner & Contributors'
 
 # The full version, including alpha/beta/rc tags
@@ -67,8 +67,8 @@ intersphinx_mapping = {
 #
 html_theme = 'furo'
 
-html_title = 'element-api Documentation'
-html_short_title = f'element-api-{release}'
+html_title = 'element-iot-api Documentation'
+html_short_title = f'element-iot-api-{release}'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
