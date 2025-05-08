@@ -1,24 +1,30 @@
-[![ci](https://github.com/RUBclim/element-api/actions/workflows/ci.yml/badge.svg)](https://github.com/RUBclim/element-api/actions/workflows/ci.yml)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/RUBclim/element-api/main.svg)](https://results.pre-commit.ci/latest/github/RUBclim/element-api/main)
-[![deploy docs to gh-page](https://github.com/RUBclim/element-api/actions/workflows/pages.yaml/badge.svg)](https://github.com/RUBclim/element-api/actions/workflows/pages.yaml)
+[![ci](https://github.com/RUBclim/element-iot-api/actions/workflows/ci.yml/badge.svg)](https://github.com/RUBclim/element-iot-api/actions/workflows/ci.yml)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/RUBclim/element-iot-api/main.svg)](https://results.pre-commit.ci/latest/github/RUBclim/element-iot-api/main)
+[![deploy docs to gh-page](https://github.com/RUBclim/element-iot-api/actions/workflows/pages.yaml/badge.svg)](https://github.com/RUBclim/element-iot-api/actions/workflows/pages.yaml)
 
-# element-api
+# element-iot-api
 
 **A separate sphinx documentation exists and can be found here:
-[Docs](https://rubclim.github.io/element-api)**
+[Docs](https://rubclim.github.io/element-iot-api)**
 
 ## Installation
+
+via pip
+
+```bash
+pip install element-iot-api
+```
 
 via https
 
 ```bash
-pip install git+https://github.com/RUBclim/element-api
+pip install git+https://github.com/RUBclim/element-iot-api
 ```
 
 via ssh
 
 ```bash
-pip install git+ssh://git@github.com/RUBclim/element-api
+pip install git+ssh://git@github.com/RUBclim/element-iot-api
 ```
 
 ## Quick start

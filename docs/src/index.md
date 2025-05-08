@@ -1,4 +1,4 @@
-# Welcome to element-api's documentation!
+# Welcome to element-iot-api's documentation!
 
 ```{toctree}
 ---
@@ -22,13 +22,13 @@ api/element.md
 via https
 
 ```bash
-pip install git+https://github.com/RUBclim/element-api
+pip install git+https://github.com/RUBclim/element-iot-api
 ```
 
 via ssh
 
 ```bash
-pip install git+ssh://git@github.com/RUBclim/element-api
+pip install git+ssh://git@github.com/RUBclim/element-iot-api
 ```
 
 ## Quick start
