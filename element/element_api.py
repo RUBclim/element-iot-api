@@ -94,7 +94,8 @@ class ElementApi:
             # populate the cache when no folder was specified
             folder = device['tags'][0]['slug']
         # we can also populate the cache this way
-        self._id_to_address_mapping[folder][decentlab_id] = address
+        if folder is not None:
+            self._id_to_address_mapping[folder][decentlab_id] = address
 
         return decentlab_id
 
